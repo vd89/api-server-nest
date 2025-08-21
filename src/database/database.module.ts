@@ -7,19 +7,25 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      inject: [ ConfigService ],
+
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get<string>('DB_USER', 'postgres'),
-        password: configService.get<string>('DB_PASS', 'adminPassword'),
-        database: configService.get<string>('DB_NAME', 'task_manager'),
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.database'),
         autoLoadEntities: true,
-        synchronize: false,
-        migrations: ['dist/database/migrations/*.js'],
-        migrationsRun: true,
-      }),
-      inject: [ConfigService],
+        synchronize: configService.get('database.synchronize'),
+        migrations: [ __dirname + '/database/migrations/*{.ts,.js}' ],
+        migrationsRun: configService.get('database.migrationsRun'),
+        logging: configService.get('database.logging'),
+        // Add connection pool configuration for better performance
+        poolSize: configService.get('database.poolSize', 10),
+        /// Add SSL configuration for production
+        ssl: configService.get('database.ssl', false) ? { rejectUnauthorized: false } : false,
+      })
     }),
   ],
 })
