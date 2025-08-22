@@ -3,7 +3,7 @@ import pino, { Logger } from 'pino';
 
 @Injectable()
 export class LoggerService {
-  private readonly logger: Logger;
+  private logger: Logger;
 
   constructor () {
     const transports: any[] = [];
@@ -29,6 +29,9 @@ export class LoggerService {
         ? { targets: transports }
         : undefined,
     });
+  }
+  setContext (context: string): void {
+    this.logger = this.logger.child({ context });
   }
 
   info (message: string, ...args: any[]) {

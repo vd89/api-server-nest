@@ -8,11 +8,12 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { LoggerService } from './common/logging/logger.service';
 
 
-import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
+import { ValidationPipe } from '@nestjs/common';
+import { CoreModule } from './modules/core/core.module';
 
 async function bootstrap () {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(CoreModule, { bufferLogs: true });
 
   // helmet for setting
   app.use(helmet());
@@ -22,6 +23,13 @@ async function bootstrap () {
 
   // Enable CORS
   app.enableCors();
+
+  // Add global validation pipe
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
 
   // Set global prefix for API routes
   app.setGlobalPrefix('api');
